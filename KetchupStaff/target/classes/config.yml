@@ -1,0 +1,43 @@
+# Discord webhook
+webhook-url: "webhook url"
+
+# Přístup k db
+database:
+  name: "jmeno"
+  user: "uzivatel"
+  password: "heslo"
+  port: 3306
+
+permissions:
+  list: "ketchupstaff.cmd.list"
+  reset: "ketchupstaff.cmd.reset"
+  checkmsg: "ketchupstaff.cmd.checkmsg"
+  playtime: "ketchupstaff.playtime"
+
+messages:
+  nly-player: "&cTento příkaz lze použít pouze jako hráč."
+  usage-main: "&ePoužití: /ketchupstaff <list/reset/checkmsg/playtime>"
+  unknown-subcommand: "&cNeznámý podpříkaz."
+  cmd-reset: "&cDatabáze byla resetována."
+  no-permission: "&cNemáš oprávnění."
+
+  # /ketchupstaff checkmsg
+  message-check: "&eHelper &6%player% &eposlal &b%count% &ezpráv za danou dobu."
+  usage-checkmsg: "&cPoužití: /ketchupstaff checkmsg <nick> <čas>"
+
+  # /ketchupstaff list
+  cmd-list: "&aSeznam všech helperů a jejich playtime:"
+  playtime-format: "&7%player%: &e%time%m"
+
+  # /ketchupstaff playtime
+  usage-playtime: "&ePoužití: /ketchupstaff playtime <nick>"
+  playtime-show: "&eHelper &b%player% &eodehrál &b%minutes% &eminut."
+  playtime-not-found: "&cNelze načíst playtime pro helpera &4%player%&c."
+
+helper-groups:
+  - helper
+  - zk.helper
+  - el.helper
+
+settings:
+  afk-detection-minutes: 10
