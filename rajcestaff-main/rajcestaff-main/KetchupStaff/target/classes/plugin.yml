@@ -1,9 +1,0 @@
-name: KetchupStaff
-version: '1.0-SNAPSHOT'
-main: bnthedev.rajce.pro.ketchupStaff.KetchupStaff
-api-version: '1.21'
-commands:
-  ketchupstaff:
-    description: Main and only command of this plugin.
-    usage: /ketchupstaff <list|reset|checkmsg>
-    permission: ketchupstaff.cmd
