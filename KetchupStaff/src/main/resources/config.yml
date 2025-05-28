@@ -3,6 +3,7 @@ webhook-url: "webhook url"
 
 # Přístup k db
 database:
+  host: "host"
   name: "jmeno"
   user: "uzivatel"
   password: "heslo"
