@@ -8,6 +8,15 @@ database:
   password: "heslo"
   port: 3306
 
+# LiteBans db
+litebans-database:
+  host: "localhost"
+  port: 3306
+  name: "litebans"
+  user: "root"
+  password: "heslo"
+
+
 permissions:
   list: "ketchupstaff.cmd.list"
   reset: "ketchupstaff.cmd.reset"
@@ -33,6 +42,15 @@ messages:
   usage-playtime: "&ePoužití: /ketchupstaff playtime <nick>"
   playtime-show: "&eHelper &b%player% &eodehrál &b%minutes% &eminut."
   playtime-not-found: "&cNelze načíst playtime pro helpera &4%player%&c."
+  # /ketchupstaff stats
+  usage-stats: "&ePoužití: /ketchupstaff stats <nick> [ban|mute|warn|kick]"
+  stats-invalid-type: "&cNeplatný typ trestu. Použij ban/mute/warn/kick."
+  stats-single: "&e%player% udělil &b%count% &e%type%(ů)."
+  stats-header: "&eStatistiky trestů od &b%player%&e:"
+  stats-bans: "&6Bany: &b%count%"
+  stats-mutes: "&6Muty: &b%count%"
+  stats-warnings: "&6Varování: &b%count%"
+  stats-kicks: "&6Kicky: &b%count%"
 
 helper-groups:
   - helper
