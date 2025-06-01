@@ -98,9 +98,10 @@ public class HelperManager {
 
         String format = KetchupStaff.getInstance().getConfig().getString("messages.playtime-format", "&7%player%: &e%time%m");
         for (Map.Entry<String, Long> entry : data.entrySet()) {
+            String formattedTime = formatTime(entry.getValue());
             String line = format
                     .replace("%player%", entry.getKey())
-                    .replace("%time%", String.valueOf(entry.getValue()));
+                    .replace("%time%", String.valueOf(formattedTime));
             sender.sendMessage(ColorUtil.color(line));
         }
     }
@@ -177,9 +178,21 @@ public class HelperManager {
             return;
         }
 
-        String playtimeMsg = KetchupStaff.getInstance().getConfig().getString("messages.playtime-show", "&e%player% má odehráno %minutes%m.");
-        playtimeMsg = playtimeMsg.replace("%player%", nick).replace("%minutes%", String.valueOf(playtime));
+        String formattedTime = formatTime(playtime);
+        String playtimeMsg = KetchupStaff.getInstance().getConfig().getString("messages.playtime-show", "&e%player% má odehráno %time%.");
+        playtimeMsg = playtimeMsg.replace("%player%", nick).replace("%time%", formattedTime);
         sender.sendMessage(ColorUtil.color(playtimeMsg));
+    }
+    private static String formatTime(long minutes) {
+        if (minutes < 60) {
+            return minutes + "m";
+        } else if (minutes < 1440) {
+            double hours = minutes / 60.0;
+            return String.format("%.1fh", hours);
+        } else {
+            double days = minutes / 1440.0;
+            return String.format("%.1fd", days);
+        }
     }
 }
 

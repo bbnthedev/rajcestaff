@@ -9,3 +9,4 @@ bnthedev\rajce\pro\ketchupStaff\Managers\DatabaseManager.class
 bnthedev\rajce\pro\ketchupStaff\Managers\WebhookManager.class
 bnthedev\rajce\pro\ketchupStaff\Utils\ColorUtil.class
 bnthedev\rajce\pro\ketchupStaff\Managers\ConfigManager.class
+bnthedev\rajce\pro\ketchupStaff\Managers\LiteBansDatabaseManager.class

@@ -3,7 +3,6 @@ webhook-url: "webhook url"
 
 # Přístup k db
 database:
-  host: "host"
   name: "jmeno"
   user: "uzivatel"
   password: "heslo"
@@ -23,6 +22,7 @@ permissions:
   reset: "ketchupstaff.cmd.reset"
   checkmsg: "ketchupstaff.cmd.checkmsg"
   playtime: "ketchupstaff.playtime"
+  stats: "ketchupstaff.stats"
 
 messages:
   nly-player: "&cTento příkaz lze použít pouze jako hráč."
@@ -37,12 +37,13 @@ messages:
 
   # /ketchupstaff list
   cmd-list: "&aSeznam všech helperů a jejich playtime:"
-  playtime-format: "&7%player%: &e%time%m"
+  playtime-format: "&7%player%: &e%time%"
 
   # /ketchupstaff playtime
   usage-playtime: "&ePoužití: /ketchupstaff playtime <nick>"
-  playtime-show: "&eHelper &b%player% &eodehrál &b%minutes% &eminut."
+  playtime-show: "&eHelper &b%player% &eodehrál &b%time%."
   playtime-not-found: "&cNelze načíst playtime pro helpera &4%player%&c."
+
   # /ketchupstaff stats
   usage-stats: "&ePoužití: /ketchupstaff stats <nick> [ban|mute|warn|kick]"
   stats-invalid-type: "&cNeplatný typ trestu. Použij ban/mute/warn/kick."

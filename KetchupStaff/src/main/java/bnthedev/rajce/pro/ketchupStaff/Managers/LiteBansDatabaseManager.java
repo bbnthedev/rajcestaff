@@ -1,13 +1,13 @@
 package bnthedev.rajce.pro.ketchupStaff.Managers;
 
+import bnthedev.rajce.pro.ketchupStaff.KetchupStaff;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-
-import bnthedev.rajce.pro.ketchupStaff.KetchupStaff;
 
 public class LiteBansDatabaseManager {
 
@@ -37,21 +37,39 @@ public class LiteBansDatabaseManager {
     }
 
     public static Map<String, Integer> getPunishmentCounts(String staffName) {
+        return getPunishmentCounts(staffName, null);
+    }
+
+    public static Map<String, Integer> getPunishmentCounts(String staffName, String timeRange) {
         Map<String, Integer> punishments = new HashMap<>();
 
-        punishments.put("bans", getCount("bans", "banned_by", staffName));
-        punishments.put("mutes", getCount("mutes", "muted_by", staffName));
-        punishments.put("warnings", getCount("warnings", "warned_by", staffName));
-        punishments.put("kicks", getCount("kicks", "kicked_by", staffName));
+        punishments.put("bans", getCount("BAN", staffName, timeRange));
+        punishments.put("mutes", getCount("MUTE", staffName, timeRange));
+        punishments.put("warnings", getCount("WARNING", staffName, timeRange));
+        punishments.put("kicks", getCount("KICK", staffName, timeRange));
 
         return punishments;
     }
 
-    private static int getCount(String table, String column, String staffName) {
+    private static int getCount(String type, String staffName, String timeRange) {
         int count = 0;
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM " + table + " WHERE " + column + " = ?");
-            ps.setString(1, staffName);
+            String sql = "SELECT COUNT(*) AS count FROM punishments WHERE operator = ? AND punishmentType = ?";
+            PreparedStatement ps;
+
+            if (timeRange != null) {
+                long timestamp = System.currentTimeMillis() - parseTimeRange(timeRange);
+                sql += " AND start >= ?";
+                ps = connection.prepareStatement(sql);
+                ps.setString(1, staffName);
+                ps.setString(2, type);
+                ps.setLong(3, timestamp);
+            } else {
+                ps = connection.prepareStatement(sql);
+                ps.setString(1, staffName);
+                ps.setString(2, type);
+            }
+
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 count = rs.getInt("count");
@@ -62,5 +80,20 @@ public class LiteBansDatabaseManager {
             e.printStackTrace();
         }
         return count;
+    }
+
+    private static long parseTimeRange(String input) {
+        try {
+            input = input.trim().toLowerCase();
+            if (input.endsWith("d")) {
+                int days = Integer.parseInt(input.replace("d", ""));
+                return days * 24L * 60L * 60L * 1000L;
+            } else if (input.endsWith("h")) {
+                int hours = Integer.parseInt(input.replace("h", ""));
+                return hours * 60L * 60L * 1000L;
+            }
+        } catch (Exception ignored) {
+        }
+        return 0L;
     }
 }

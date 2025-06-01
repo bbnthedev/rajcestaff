@@ -4,10 +4,7 @@ import bnthedev.rajce.pro.ketchupStaff.Commands.KetchupCommand;
 import bnthedev.rajce.pro.ketchupStaff.Listeners.AfkListeners;
 import bnthedev.rajce.pro.ketchupStaff.Listeners.ChatListener;
 import bnthedev.rajce.pro.ketchupStaff.Listeners.JoinQuitListener;
-import bnthedev.rajce.pro.ketchupStaff.Managers.ConfigManager;
-import bnthedev.rajce.pro.ketchupStaff.Managers.DatabaseManager;
-import bnthedev.rajce.pro.ketchupStaff.Managers.HelperManager;
-import bnthedev.rajce.pro.ketchupStaff.Managers.WebhookManager;
+import bnthedev.rajce.pro.ketchupStaff.Managers.*;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,6 +20,7 @@ public class KetchupStaff extends JavaPlugin {
         ConfigManager.setup(this);
 
         DatabaseManager.connect();
+        LiteBansDatabaseManager.connect();
         WebhookManager.init();
         HelperManager.loadHelpers();
 
