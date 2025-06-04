@@ -11,13 +11,17 @@ public class ConfigManager {
     public static void setup(KetchupStaff plugin) {
         config = plugin.getConfig();
     }
+    public static void reload(KetchupStaff plugin) {
+        plugin.reloadConfig();
+        config = plugin.getConfig();
+    }
 
     public static String getPrefix() {
         return ChatColor.translateAlternateColorCodes('&', config.getString("prefix", "&6[KetchupStaff]&r "));
     }
 
     public static String getWebhookUrl() {
-        return config.getString("webhook", "");
+        return config.getString("webhook-url", "");
     }
 
     public static String getDatabaseHost() {

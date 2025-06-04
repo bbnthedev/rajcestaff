@@ -21,7 +21,7 @@ public class LiteBansDatabaseManager {
             String user = KetchupStaff.getInstance().getConfig().getString("litebans-database.user");
             String password = KetchupStaff.getInstance().getConfig().getString("litebans-database.password");
 
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false";
+            String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&characterEncoding=utf8";
             connection = DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,37 +43,36 @@ public class LiteBansDatabaseManager {
     public static Map<String, Integer> getPunishmentCounts(String staffName, String timeRange) {
         Map<String, Integer> punishments = new HashMap<>();
 
-        punishments.put("bans", getCount("BAN", staffName, timeRange));
-        punishments.put("mutes", getCount("MUTE", staffName, timeRange));
-        punishments.put("warnings", getCount("WARNING", staffName, timeRange));
-        punishments.put("kicks", getCount("KICK", staffName, timeRange));
+        punishments.put("bans", getCount("litebans_bans", staffName, timeRange));
+        punishments.put("mutes", getCount("litebans_mutes", staffName, timeRange));
+        punishments.put("warnings", getCount("litebans_warnings", staffName, timeRange));
+        punishments.put("kicks", getCount("litebans_kicks", staffName, timeRange));
 
         return punishments;
     }
 
-    private static int getCount(String type, String staffName, String timeRange) {
+    private static int getCount(String table, String staffName, String timeRange) {
         int count = 0;
         try {
-            String sql = "SELECT COUNT(*) AS count FROM punishments WHERE operator = ? AND punishmentType = ?";
+            String sql = "SELECT COUNT(*) AS count FROM " + table + " WHERE banned_by_name = ?";
             PreparedStatement ps;
 
             if (timeRange != null) {
-                long timestamp = System.currentTimeMillis() - parseTimeRange(timeRange);
-                sql += " AND start >= ?";
+                long timestamp = System.currentTimeMillis() / 1000L - parseTimeRange(timeRange);
+                sql += " AND time >= ?";
                 ps = connection.prepareStatement(sql);
                 ps.setString(1, staffName);
-                ps.setString(2, type);
-                ps.setLong(3, timestamp);
+                ps.setLong(2, timestamp);
             } else {
                 ps = connection.prepareStatement(sql);
                 ps.setString(1, staffName);
-                ps.setString(2, type);
             }
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 count = rs.getInt("count");
             }
+
             rs.close();
             ps.close();
         } catch (Exception e) {
@@ -87,13 +86,12 @@ public class LiteBansDatabaseManager {
             input = input.trim().toLowerCase();
             if (input.endsWith("d")) {
                 int days = Integer.parseInt(input.replace("d", ""));
-                return days * 24L * 60L * 60L * 1000L;
+                return days * 24L * 60L * 60L;
             } else if (input.endsWith("h")) {
                 int hours = Integer.parseInt(input.replace("h", ""));
-                return hours * 60L * 60L * 1000L;
+                return hours * 60L * 60L;
             }
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
         return 0L;
     }
 }

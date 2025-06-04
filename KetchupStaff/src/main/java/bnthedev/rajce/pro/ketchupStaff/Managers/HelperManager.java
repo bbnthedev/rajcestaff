@@ -1,5 +1,6 @@
 package bnthedev.rajce.pro.ketchupStaff.Managers;
 
+import bnthedev.rajce.pro.ketchupStaff.KetchupStaff;
 import bnthedev.rajce.pro.ketchupStaff.Utils.ColorUtil;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -8,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import bnthedev.rajce.pro.ketchupStaff.KetchupStaff;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,9 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HelperManager {
 
-
     private static final Set<UUID> afkPlayers = ConcurrentHashMap.newKeySet();
-    private static final Map<UUID, Long> lastActivity = new HashMap<>();
+    private static final Map<UUID, Long> lastActivity = new ConcurrentHashMap<>();
 
     public static void loadHelpers() {
         new BukkitRunnable() {
@@ -33,6 +32,39 @@ public class HelperManager {
                 }
             }
         }.runTaskTimerAsynchronously(KetchupStaff.getInstance(), 20 * 60, 20 * 60); // každou minutu
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (!isHelper(p)) continue;
+
+                    UUID uuid = p.getUniqueId();
+                    boolean currentlyAfk = isAFK(uuid);
+                    boolean wasAfk = afkPlayers.contains(uuid);
+
+                    if (currentlyAfk && !wasAfk) {
+                        afkPlayers.add(uuid);
+                        WebhookManager.sendMessage("👻 Helper " + p.getName() + " je AFK");
+                    } else if (!currentlyAfk && wasAfk) {
+                        afkPlayers.remove(uuid);
+                        WebhookManager.sendMessage("🎮 Helper " + p.getName() + " už není AFK");
+                    }
+                }
+            }
+        }.runTaskTimer(KetchupStaff.getInstance(), 20 * 10, 20 * 10); // každých 10s
+    }
+
+    public static void recordActivity(UUID uuid) {
+        lastActivity.put(uuid, System.currentTimeMillis());
+    }
+
+    public static boolean isAFK(UUID uuid) {
+        Long last = lastActivity.get(uuid);
+        if (last == null) return false;
+
+        long delay = ConfigManager.getAfkDelayMillis();
+        return System.currentTimeMillis() - last >= delay;
     }
 
     public static boolean isHelper(Player player) {
@@ -49,18 +81,6 @@ public class HelperManager {
             return false;
         }
     }
-
-    public static void recordActivity(UUID uuid) {
-        lastActivity.put(uuid, System.currentTimeMillis());
-        afkPlayers.remove(uuid);
-    }
-
-    public static boolean isAFK(UUID uuid) {
-        Long last = lastActivity.get(uuid);
-        if (last == null) return false;
-        return System.currentTimeMillis() - last >= ConfigManager.getAfkDelayMillis();
-    }
-
 
     public static void addPlaytime(String nickname, long minutes) {
         try {
@@ -89,6 +109,7 @@ public class HelperManager {
         }
         return result;
     }
+
     public static void sendPlaytimeList(CommandSender sender) {
         Map<String, Long> data = getAllPlaytime();
         if (data.isEmpty()) {
@@ -101,11 +122,43 @@ public class HelperManager {
             String formattedTime = formatTime(entry.getValue());
             String line = format
                     .replace("%player%", entry.getKey())
-                    .replace("%time%", String.valueOf(formattedTime));
+                    .replace("%time%", formattedTime);
             sender.sendMessage(ColorUtil.color(line));
         }
     }
 
+    public static long getPlaytimeRaw(String nickname) {
+        long playtime = -1;
+        try {
+            Connection conn = DatabaseManager.getConnection();
+            PreparedStatement ps = conn.prepareStatement("SELECT time FROM playtime WHERE nickname = ?");
+            ps.setString(1, nickname);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                playtime = rs.getLong("time");
+            }
+
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return playtime;
+    }
+
+    public static void sendPlaytime(CommandSender sender, String nick) {
+        long playtime = getPlaytimeRaw(nick);
+        if (playtime <= 0) {
+            String notFoundMsg = KetchupStaff.getInstance().getConfig().getString("messages.playtime-not-found", "&cHelper %player% nemá žádný záznam.");
+            sender.sendMessage(ColorUtil.color(notFoundMsg.replace("%player%", nick)));
+            return;
+        }
+
+        String formattedTime = formatTime(playtime);
+        String playtimeMsg = KetchupStaff.getInstance().getConfig().getString("messages.playtime-show", "&e%player% má odehráno %time%.");
+        sender.sendMessage(ColorUtil.color(playtimeMsg.replace("%player%", nick).replace("%time%", formattedTime)));
+    }
 
     public static int getMessageCount(String nick, String time) {
         long fromTimestamp = parseTimeToTimestamp(time);
@@ -148,41 +201,7 @@ public class HelperManager {
         } catch (NumberFormatException ignored) {}
         return now - 24L * 60 * 60 * 1000;
     }
-    public static long getPlaytimeRaw(String nickname) {
-        long playtime = -1;
-        try {
-            Connection conn = DatabaseManager.getConnection();
-            PreparedStatement ps = conn.prepareStatement(
-                    "SELECT time FROM playtime WHERE nickname = ?"
-            );
-            ps.setString(1, nickname);
-            ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                playtime = rs.getLong("time");
-            }
-
-            rs.close();
-            ps.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return playtime;
-    }
-
-    public static void sendPlaytime(CommandSender sender, String nick) {
-        long playtime = getPlaytimeRaw(nick);
-        if (playtime <= 0) {
-            String notFoundMsg = KetchupStaff.getInstance().getConfig().getString("messages.playtime-not-found", "&cHráč %player% nemá žádný záznam.");
-            sender.sendMessage(ColorUtil.color(notFoundMsg.replace("%player%", nick)));
-            return;
-        }
-
-        String formattedTime = formatTime(playtime);
-        String playtimeMsg = KetchupStaff.getInstance().getConfig().getString("messages.playtime-show", "&e%player% má odehráno %time%.");
-        playtimeMsg = playtimeMsg.replace("%player%", nick).replace("%time%", formattedTime);
-        sender.sendMessage(ColorUtil.color(playtimeMsg));
-    }
     private static String formatTime(long minutes) {
         if (minutes < 60) {
             return minutes + "m";
@@ -195,5 +214,3 @@ public class HelperManager {
         }
     }
 }
-
-

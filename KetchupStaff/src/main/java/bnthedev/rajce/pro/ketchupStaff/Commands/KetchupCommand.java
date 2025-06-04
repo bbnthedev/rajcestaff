@@ -1,6 +1,7 @@
 package bnthedev.rajce.pro.ketchupStaff.Commands;
 
 import bnthedev.rajce.pro.ketchupStaff.KetchupStaff;
+import bnthedev.rajce.pro.ketchupStaff.Managers.ConfigManager;
 import bnthedev.rajce.pro.ketchupStaff.Managers.DatabaseManager;
 import bnthedev.rajce.pro.ketchupStaff.Managers.HelperManager;
 import bnthedev.rajce.pro.ketchupStaff.Managers.LiteBansDatabaseManager;
@@ -49,7 +50,14 @@ public class KetchupCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(ColorUtil.color(KetchupStaff.getInstance().getConfig().getString("messages.cmd-reset")));
                 DatabaseManager.resetDatabase();
                 break;
-
+            case "reload":
+                if (!player.hasPermission(KetchupStaff.getInstance().getConfig().getString("permissions.reload"))) {
+                    player.sendMessage(ColorUtil.color(KetchupStaff.getInstance().getConfig().getString("messages.no-permission")));
+                    return true;
+                }
+                ConfigManager.reload(KetchupStaff.getInstance());
+                player.sendMessage(ColorUtil.color(KetchupStaff.getInstance().getConfig().getString("messages.reload-success")));
+                break;
             case "stats":
                 if (!player.hasPermission(KetchupStaff.getInstance().getConfig().getString("permissions.stats"))) {
                     player.sendMessage(ColorUtil.color(KetchupStaff.getInstance().getConfig().getString("messages.no-permission")));
@@ -72,12 +80,26 @@ public class KetchupCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ColorUtil.color(KetchupStaff.getInstance().getConfig().getString("messages.stats-kicks")
                             .replace("%count%", String.valueOf(stats.getOrDefault("kicks", 0)))));
 
-                    long playtimeAll = HelperManager.getPlaytimeRaw(staff);
-                    String timeFmt = String.format("%.1f", playtimeAll / 60.0);
-                    player.sendMessage(ColorUtil.color("&ePlaytime: &f" + timeFmt + "h"));
+                    long playtimeMinutes = HelperManager.getPlaytimeRaw(staff); // minutes
+                    String timeFormatted;
 
+                    if (playtimeMinutes < 60) {
+                        timeFormatted = playtimeMinutes + "m";
+                    } else if (playtimeMinutes < 60 * 24) {
+                        timeFormatted = String.format("%.1f", playtimeMinutes / 60.0) + "h";
+                    } else {
+                        timeFormatted = String.format("%.1f", playtimeMinutes / 60.0 / 24.0) + "d";
+                    }
+
+                    player.sendMessage(ColorUtil.color(
+                            KetchupStaff.getInstance().getConfig().getString("messages.stats-playtime")
+                                    .replace("%time%", timeFormatted)
+                    ));
                     int msgCountAll = HelperManager.getMessageCount(staff, "7d");
-                    player.sendMessage(ColorUtil.color("&eNapsal zpráv (7d): &f" + msgCountAll));
+                    player.sendMessage(ColorUtil.color(
+                            KetchupStaff.getInstance().getConfig().getString("messages.stats-messages-7d")
+                                    .replace("%count%", String.valueOf(msgCountAll))
+                    ));
 
                     return true;
                 }

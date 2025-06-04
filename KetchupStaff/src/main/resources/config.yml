@@ -20,26 +20,25 @@ litebans-database:
 permissions:
   list: "ketchupstaff.cmd.list"
   reset: "ketchupstaff.cmd.reset"
-  checkmsg: "ketchupstaff.cmd.checkmsg"
-  playtime: "ketchupstaff.playtime"
   stats: "ketchupstaff.stats"
+  reload: "ketchupstaff.reload"
 
 messages:
   nly-player: "&cTento příkaz lze použít pouze jako hráč."
-  usage-main: "&ePoužití: /ketchupstaff <list/reset/checkmsg/playtime>"
+  usage-main: "&ePoužití: /ketchupstaff <list/reset/stats>"
   unknown-subcommand: "&cNeznámý podpříkaz."
   cmd-reset: "&cDatabáze byla resetována."
   no-permission: "&cNemáš oprávnění."
 
-  # /ketchupstaff checkmsg
+  # /ketchupstaff stats checkmsg
   message-check: "&eHelper &6%player% &eposlal &b%count% &ezpráv za danou dobu."
-  usage-checkmsg: "&cPoužití: /ketchupstaff checkmsg <nick> <čas>"
+  usage-checkmsg: "&cPoužití: /ketchupstaff stats checkmsg <nick> <čas>"
 
   # /ketchupstaff list
   cmd-list: "&aSeznam všech helperů a jejich playtime:"
   playtime-format: "&7%player%: &e%time%"
 
-  # /ketchupstaff playtime
+  # /ketchupstaff stats playtime
   usage-playtime: "&ePoužití: /ketchupstaff playtime <nick>"
   playtime-show: "&eHelper &b%player% &eodehrál &b%time%."
   playtime-not-found: "&cNelze načíst playtime pro helpera &4%player%&c."
@@ -53,6 +52,12 @@ messages:
   stats-mutes: "&6Muty: &b%count%"
   stats-warnings: "&6Varování: &b%count%"
   stats-kicks: "&6Kicky: &b%count%"
+  stats-playtime: "&ePlaytime: &f%time%"
+  stats-messages-7d: "&eNapsal zpráv (7d): &f%count%"
+
+  # /ketchupstaff reload
+  reload-success: "&aConfig úspěšně načten."
+
 
 helper-groups:
   - helper
